@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Weather Modern UI</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #a1c4fd, #c2e9fb);
+      text-align: center;
+      padding: 30px;
+    }
+    h1 {
+      color: #222;
+    }
+    .buttons button {
+      background-color: #007BFF;
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .buttons button:hover {
+      background-color: #0056b3;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      max-width: 400px;
+      margin: 30px auto;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    .weather-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      text-align: left;
+    }
+    .weather-info p {
+      margin: 4px 0;
+    }
+    .icon {
+      width: 80px;
+      margin: 10px auto;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🌤 Weather Checker</h1>
+
+  <div class="buttons">
+    <button onclick="getWeather('Colombo', 'LK', 'Asia/Colombo')">Sri Lanka</button>
+    <button onclick="getWeather('Dubai', 'AE', 'Asia/Dubai')">Dubai</button>
+    <button onclick="getWeather('Tokyo', 'JP', 'Asia/Tokyo')">Japan</button>
+    <button onclick="getWeather('Wellington', 'NZ', 'Pacific/Auckland')">New Zealand</button>
+    <button onclick="getWeather('Sydney', 'AU', 'Australia/Sydney')">Australia</button>
+  </div>
+
+  <div id="weatherCard" class="card" style="display: none;"></div>
+
+  <script>
+    const apiKey = 'd65b6f7e573f0ae745b4b8917cd6ba01'; 
+    const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
+
+    async function getWeather(city, countryCode, timeZone) {
+      const url = `${BASE_URL}?q=${city}&appid=${apiKey}&units=metric`;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.cod !== 200) throw new Error(data.message);
+
+        const iconURL = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+
+        const localDate = new Date(data.dt * 1000);
+        const formattedTime = new Intl.DateTimeFormat('en-US', {
+          timeZone: timeZone,
+          dateStyle: 'full',
+          timeStyle: 'short'
+        }).format(localDate);
+
+        const weatherHTML = `
+          <h2>${data.name}, ${countryCode}</h2>
+          <img src="${iconURL}" class="icon" alt="Weather icon"/>
+          <div class="weather-info">
+            <p><strong>🌡 Temperature:</strong></p><p>${data.main.temp} °C</p>
+            <p><strong>☁ Weather:</strong></p><p>${data.weather[0].main}</p>
+            <p><strong>💨 Wind Speed:</strong></p><p>${data.wind.speed} m/s</p>
+            <p><strong>🕒 Local Time:</strong></p><p>${formattedTime}</p>
+          </div>
+        `;
+
+        const card = document.getElementById("weatherCard");
+        card.innerHTML = weatherHTML;
+        card.style.display = "block";
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    }
+  </script>
+</body>
+</html>
